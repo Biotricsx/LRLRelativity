@@ -25,7 +25,7 @@ IMPORTANT END
 
 INSTRUCTIONS TO INSTALL
 
-1. When you download the zip file (LRLRelativity.zip) from the google drive link provided (never use untrusted links), it will have 3 files. Put these 3 LRL files in the game's install folder (where LittleRocketLab.exe executable is).
+1. When you download the zip file (LRLRelativity.zip) from the link provided (never use untrusted links), it will have 3 files. Put these 3 LRL files in the game's install folder (where LittleRocketLab.exe executable is).
 
 2. Make sure the game is not running: Then run the LRLRelativity.exe file (the executable of the patch...not the game). A command prompt window will open. First it will check hash of the dll. Then it will ask you for a new value (I recommend 75 or 110 for example). Then it will do the patching.
 
