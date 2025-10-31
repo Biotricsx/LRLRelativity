@@ -3,24 +3,65 @@ using System.Security.Cryptography;
 
 public static class FilePatcher
 {
-    private static bool MatchFileHash(string filePath, string expectedSha256HexUpper)
+    // Returns an array of file offsets (long[]) where 'pattern' exactly matches in file.
+    // If no matches, returns an empty array.
+    private static long[] FindPatternMatches(string filePath, byte[] pattern)
     {
-        using (SHA256 sha = SHA256.Create())
-        using (FileStream fs = File.OpenRead(filePath))
+        if (pattern == null || pattern.Length == 0)
+            throw new ArgumentException("An unknown error has occured! No changes have been made.", nameof(pattern));
+
+        byte[] haystack = File.ReadAllBytes(filePath);
+        int n = haystack.Length;
+        int m = pattern.Length;
+
+        var matches = new List<long>();
+        // KMP preprocessing (lps = longest proper prefix which is also suffix)
+        int[] lps = new int[m];
+        for (int i = 1, len = 0; i < m;)
         {
-
-            byte[] calculatedHash = sha.ComputeHash(fs);
-            string calculatedHashStr = Convert.ToHexString(calculatedHash).ToUpperInvariant();
-
-            Console.WriteLine("\nExpected Hash: " + expectedSha256HexUpper);
-            Console.WriteLine("Computed Hash: " + calculatedHashStr);
-
-            if (calculatedHashStr != expectedSha256HexUpper)
-                return false;
+            if (pattern[i] == pattern[len])
+            {
+                len++;
+                lps[i] = len;
+                i++;
+            }
+            else
+            {
+                if (len != 0)
+                    len = lps[len - 1];
+                else
+                {
+                    lps[i] = 0;
+                    i++;
+                }
+            }
         }
 
-        return true;
+        // KMP search
+        int j = 0; // index in pattern
+        for (int i = 0; i < n;)
+        {
+            if (haystack[i] == pattern[j])
+            {
+                i++; j++;
+                if (j == m)
+                {
+                    matches.Add((long)(i - j));
+                    j = lps[j - 1];
+                }
+            }
+            else
+            {
+                if (j != 0)
+                    j = lps[j - 1];
+                else
+                    i++;
+            }
+        }
+
+        return matches.Count == 0 ? [] : [.. matches];
     }
+
 
     private static (bool success, bool wasModified) PatchBytes(string filePath, long fileOffset, byte[] expectedOriginalBytes, byte[] targetPatchBytes)
     {
@@ -132,6 +173,8 @@ public static class FilePatcher
 
         List<string> filesInDir = [.. Directory.EnumerateFiles(baseDir)];
 
+        long targetOffset;
+
         bool foundExe = false;
         bool foundDll = false;
 
@@ -155,15 +198,24 @@ public static class FilePatcher
             goto EndReadLine;
         }
 
-        Console.WriteLine("Testing hash of GameAssembly.dll\n");
-        bool hashMatched = MatchFileHash(dllPath, "765787245278B503B04E2B754930E72038E125B153B0AF31083235E4116D22C0");
+        Console.WriteLine("Searching for byte pattern to patch.");
 
-        if (!hashMatched)
+        long[] foundOffsets = FindPatternMatches(dllPath, [0x00, 0x00, 0xB8, 0x41, 0x00, 0x00, 0x5C, 0x42]);
+
+        if (foundOffsets == null)
         {
-            Console.WriteLine("\nHash mismatch! The file provided doesnt match the expected GameAssembly.dll! The file might be different or the game version might be different.");
+            Console.WriteLine("Encountered unknown error! No changes have been made.");
             goto EndReadLine;
         }
-        else Console.WriteLine("\nHashes matched.");
+
+        if (foundOffsets.Length == 0 || foundOffsets.Length > 1)
+        {
+            Console.WriteLine("Unfortunately...couldn't find required (unique) pattern to patch. Possibly the game has undergone significant changes... No changes have been made.");
+            goto EndReadLine;
+        }
+
+        Console.WriteLine("\nFound a pattern match!");
+        targetOffset = foundOffsets[0] + 4;
 
         Console.WriteLine("\nEnter new 'SecondsInHour' value (The amount of seconds in 1 in-game hour. The original value is 55. To double it try 110): ");
 
@@ -194,7 +246,7 @@ public static class FilePatcher
         else
         {
             byte[] newValueBytes = GetFloatBytes(newValue);
-            patchResult = PatchBytes(dllPath, 0x02AD8280, [0x00, 0x00, 0x5C, 0x42], newValueBytes);
+            patchResult = PatchBytes(dllPath, targetOffset, [0x00, 0x00, 0x5C, 0x42], newValueBytes);
         }
 
         if (patchResult.success)
