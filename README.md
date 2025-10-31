@@ -5,7 +5,7 @@ PLEASE READ THE WHOLE DOC BEFORE USING. DONT USE IF UNSURE.
 
 I have created this LRLRelativity mod/patcher to change how fast time moves in the game.
 
-How? There is a value called 'SecondsInHour'. This value controls how many real world seconds there are in each game hour. The default (original) value is 55.0. So in each hour of the game, 55 real world seconds pass. This value is present in the file 'GameAssembly.dll' of the game. This patcher changes that value to your provided value. Use at your own risk. Source code provided (at the end). Recommended values: 75, 110. Only for game version 1.0.4. Find known issues towards the end.
+How? There is a value called 'SecondsInHour'. This value controls how many real world seconds there are in each game hour. The default (original) value is 55.0. So in each hour of the game, 55 real world seconds pass. This value is present in the file 'GameAssembly.dll' of the game. This patcher changes that value to your provided value. Use at your own risk. Source code provided (at the end). Recommended values: 75, 110. Should work for all game versions (windows only). Find known issues towards the end.
 
 
 IMPORTANT
@@ -13,9 +13,8 @@ IMPORTANT
 
 1. This patcher modifies the GameAssembly.dll game file (a backup is also created). Till a more robust mod (which doesnt change the game files) is created, this can work well. If you are not comfortable with that, skip this.
 2. DO NOT use this patch for your first experience of the game and only use it if you really dislike the time passage. Because this will change the player experience. The game design (and content) is probably optimized for 55.0 real world seconds in one game hour.
-3. This patch only works with the 1.0.4 version. Basically I am checking if the dll file is same or not. If the file changes in the future(or you use it on something else), this patch will deliberately not execute. I may update it for newer versions whenever they release...but cannot promise that.
-4. If your game is installed in a restricted folder (which requires run as administrator), I request you move the game install to another steam folder...otherwise it may fail to create the backup dll file. I don't recommend running the patcher as administrator just to be safe.
-5. If the devs tell me to remove this patch (for whatever reason), I will remove it. DONT ask me for the removed patch in those cases.
+3. If your game is installed in a restricted folder (which requires run as administrator), I request you move the game install to another steam folder...otherwise it may fail to create the backup dll file. I don't recommend running the patcher as administrator just to be safe.
+4. If the devs tell me to remove this patch (for whatever reason), I will remove it. DONT ask me for the removed patch in those cases.
 
 Thanks
 
@@ -27,7 +26,7 @@ INSTRUCTIONS TO INSTALL
 
 1. When you download the zip file (LRLRelativity.zip) from the link provided (never use untrusted links), it will have 3 files. Put these 3 LRL files in the game's install folder (where LittleRocketLab.exe executable is).
 
-2. Make sure the game is not running: Then run the LRLRelativity.exe file (the executable of the patch...not the game). A command prompt window will open. First it will check hash of the dll. Then it will ask you for a new value (I recommend 75 or 110 for example). Then it will do the patching.
+2. Make sure the game is not running: Then run the LRLRelativity.exe file (the executable of the patch...not the game). A command prompt window will open. First it will try to find the required pattern in the DLL to patch. Then, if successful, it will ask you for a new value (I recommend 75 or 110 for example). Then it will do the patching.
 
 3. It will also create the ""GameAssembly.dll.DONT_DELETE.bak"" file which is the original file backup just with a different name.
 
@@ -37,7 +36,7 @@ INSTRUCTIONS TO INSTALL
 
 6. If the patch's exe doesnt even open then something has gone wrong. Usually, in those cases, no changes have been made, so the game should still work normally.
 
-7. After patching you can actually remove the 3 LRLRelativity files but dont remove the backup file as that is the original dll file (backup filename: GameAssembly.dll.DONT_DELETE.bak).
+7. After patching you can actually remove the 3 LRLRelativity files but dont remove the backup file as that is the original game dll file (again, this is the backup filename: GameAssembly.dll.DONT_DELETE.bak).
 
 8. ONLY WHEN YOU HAVE USED THE PATCH at least once (and the backup file is present): Suppose you want to restore the game to normal, either you can just delete the game folder (uninstall) and reinstall the game from steam; OR OR you can delete the 'GameAssembly.dll' (which is the patched version) and remove the '.DONT_DELETE.bak' part of the ""GameAssembly.dll.DONT_DELETE.bak"" file's filename (this file is the original dll)...basically you need to remove the patched dll and restore the original dll's name; that will restore the game to normal.
 
